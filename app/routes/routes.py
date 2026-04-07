@@ -9,8 +9,9 @@ with Supabase), and returns JSON responses.
 
 Current capabilities:
 1. Serving the Jinja2 HTML Frontend (Dynamic index).
-2. Providing a Database Health check (`/health/db`).
-3. Handling User Profile Creation (`/api/profiles`).
+2. Serving the Personalized Field Worker Dashboard (`/profile_dashboard`).
+3. Providing a Database Health check (`/health/db`).
+4. Handling User Profile Creation API (`/api/profiles`).
 
 """
 from fastapi import APIRouter, Request
@@ -74,6 +75,46 @@ async def index(request: Request):
         # If the database is unreachable, catch it and return gracefully
         return {"status": "error", "message": str(e)}
 
+
+@router.get("/profile_dashboard")
+async def profile_dashboard(request: Request, profile_id: str):
+    """
+    Dashboard Endpoint - Serves the personalized user dashboard.
+    
+    This route acts as a "catcher" for the frontend form. It automatically extracts
+    the `profile_id` parameter from the incoming URL (e.g., ?profile_id=123) and 
+    uses it to securely fetch that exact user's data from Supabase.
+
+    """
+    try:
+        # Step 1: Securely query Supabase for the specific user matching the URL ID
+        # We use .eq() to filter the table rows exactly like a SQL WHERE clause
+        profile_response = (
+            supabase.table("profiles")
+            .select("*")
+            .eq("id", profile_id)
+            .execute()
+        )
+
+        # Since IDs are unique, we extract the first (and only) dictionary in the list
+        actual_profile = profile_response.data[0]
+
+        # Step 2: Box up the profile data so the Jinja engine can read it
+        profile_context_data = {
+            "request": request,       # Strictly required by FastAPI for templating
+            "profile": actual_profile # Injected so HTML can use {{ profile.first_name }}
+        }
+
+        # Step 3: Pass everything to the template engine to compile into HTML
+        return index_template.TemplateResponse(
+            request=request,
+            name="profile_dashboard.html",
+            context=profile_context_data
+        )
+
+    except Exception as e:
+        # If the database is unreachable or the ID is invalid, catch it and return gracefully
+        return {"status": "error", "message": str(e)}
 
 # ==========================================
 # DIAGNOSTIC ROUTES

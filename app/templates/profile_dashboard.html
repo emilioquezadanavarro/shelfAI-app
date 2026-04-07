@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfAI | Dashboard</title>
+    
+    <!-- Google Fonts: Modern typography matching our brand guidelines -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- External modular CSS providing the glassmorphism container styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <!-- Container override class 'dashboard-container' allows for page-specific width adjustments -->
+    <div class="container dashboard-container">
+        
+        <div class="header-section">
+            <!-- 
+            Dynamic User Greeting:
+            FastAPI successfully queried Supabase for this specific worker and passed the data
+            inside the 'profile' context variable. Jinja2 injects it right here natively!
+            -->
+            <p class="welcome-header">Welcome Back</p>
+            <h1>{{ profile.first_name }} {{ profile.last_name }}</h1>
+            <p>Upload a shelf photo to begin the AI audit.</p>
+        </div>
+
+        <!-- 
+        The Image Upload Form:
+        This form will eventually point to the Langchain AI Endpoint.
+        CRITICAL: `enctype="multipart/form-data"` is absolutely required for any form
+        that handles file uploads. Without it, the browser will not send the image binary.
+        -->
+        <form action="/api/analyze-shelf" method="POST" enctype="multipart/form-data">
+            
+            <!-- 
+            Session Tracking (Hidden Input):
+            We must explicitly pass the worker's ID to the AI endpoint. 
+            By placing it in a hidden input, it is automatically bundled securely with the photo,
+            ensuring the final audit results are forever linked to this exact employee.
+            -->
+            <input type="hidden" name="profile_id" value="{{ profile.id }}">
+
+            <!-- Drag & Drop Upload Zone styled with custom CSS -->
+            <div class="upload-area">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Tap to take a photo</div>
+                <div class="upload-subtext">or drag and drop an image here</div>
+                
+                <!-- 
+                File Input Constraint:
+                `accept="image/*"` restricts the upload widget to pictures. On mobile devices, 
+                this triggers the OS to open the camera directly.
+                -->
+                <input type="file" name="shelf_photo" accept="image/*" required>
+            </div>
+            
+            <button type="submit">Run AI Audit</button>
+        </form>
+    </div>
+
+</body>
+</html>

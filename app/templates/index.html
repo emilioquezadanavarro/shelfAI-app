@@ -23,14 +23,15 @@
     <div class="container">
         <h1>ShelfAI</h1>
         <p>Select a field worker profile to begin your audit.</p>
-
+        
         <!-- 
-        The Form:
-        When the user clicks 'Continue', the browser will take the selected profile_id
-        and navigate to the Dashboard (e.g., http://localhost:8000/dashboard?profile_id=1d254...).
-        This route will be implemented later!
+        The HTML Form & Routing:
+        When the user clicks 'Continue', the browser reads the selected 'profile_id' UUID value
+        and builds a URL parameter string. It sends a GET request to the backend route 
+        we defined as `@router.get("/profile_dashboard")`.
+        Example generated URL: http://localhost:8000/profile_dashboard?profile_id=1d25496b...
         -->
-        <form action="/dashboard" method="GET">
+        <form action="/profile_dashboard" method="GET">
             <div class="input-group">
                 <label for="profile_select">Field Worker</label>
                 
@@ -47,7 +48,7 @@
                     {% for profile in profiles %}
                         <!-- 
                         For each profile, we inject data dynamically.
-                        The 'value' holds the secure database UUID (what the server cares about),
+                        The 'value' holds the secure database UUID (what the server needs),
                         while the text holds the human-readable First and Last Name.
                         -->
                         <option value="{{ profile.id }}">{{ profile.first_name }} {{ profile.last_name }}</option>
