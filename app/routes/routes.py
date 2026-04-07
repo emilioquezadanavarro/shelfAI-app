@@ -8,7 +8,7 @@ requests from the frontend or API clients, processes them (often by interacting
 with Supabase), and returns JSON responses.
 
 Current capabilities:
-1. Serving the Jinja2 HTML Frontend.
+1. Serving the Jinja2 HTML Frontend (Dynamic index).
 2. Providing a Database Health check (`/health/db`).
 3. Handling User Profile Creation (`/api/profiles`).
 
@@ -40,13 +40,43 @@ index_template = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__
 async def index(request: Request):
     """
     Root Endpoint - Serves the main HTML interface of the application.
-    When a user goes to localhost:8000/, this function returns the index.html file.
+    
+    Before returning the index.html file, this route actively queries the Supabase
+    database for all existing user profiles. It then injects those profiles into the 
+    HTML template so they can be rendered dynamically in the dropdown menu.
+
     """
-    return index_template.TemplateResponse(request=request, name="index.html")
+    try:
+        # Step 1: Query Supabase for all profiles
+        response = (
+            supabase.table("profiles")
+            .select("*")
+            .execute()
+        )
+
+        all_users = response.data
+
+        # Step 2: Bundle the data into a "context" dictionary
+        # The frontend Jinja2 engine will look for the key "profiles"
+        context_data = {
+            "request": request,    # Strictly required by FastAPI
+            "profiles": all_users  # The list of dictionaries from Supabase
+        }
+
+        # Step 3: Pass everything to the template engine to compile into HTML
+        return index_template.TemplateResponse(
+            request=request,
+            name="index.html",
+            context=context_data
+        )
+
+    except Exception as e:
+        # If the database is unreachable, catch it and return gracefully
+        return {"status": "error", "message": str(e)}
 
 
 # ==========================================
-# 🩺 DIAGNOSTIC ROUTES
+# DIAGNOSTIC ROUTES
 # ==========================================
 @router.get("/health/db")
 async def health_route():

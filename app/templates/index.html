@@ -2,10 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ShelfAI App</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfAI | Select Profile</title>
+    
+    <!-- Google Fonts: Inter. Used for a clean, modern aesthetic across the app -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- 
+    Custom CSS Linkage: 
+    This hooks into our FastAPI backend. The route `/static` mapped in `app/__init__.py` 
+    securely loads `styles.css` from the `app/templates/static` directory.
+    -->
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-<h1>Hello! Welcome to ShelfAI App!</h1>
+
+    <!-- Main styled glassmorphism card -->
+    <div class="container">
+        <h1>ShelfAI</h1>
+        <p>Select a field worker profile to begin your audit.</p>
+
+        <!-- 
+        The Form:
+        When the user clicks 'Continue', the browser will take the selected profile_id
+        and navigate to the Dashboard (e.g., http://localhost:8000/dashboard?profile_id=1d254...).
+        This route will be implemented later!
+        -->
+        <form action="/dashboard" method="GET">
+            <div class="input-group">
+                <label for="profile_select">Field Worker</label>
+                
+                <select id="profile_select" name="profile_id" required>
+                    <!-- Default disabled option ensuring the user actively chooses someone -->
+                    <option value="" disabled selected>Select a profile...</option>
+                    
+                    <!-- 
+                    Jinja2 Templating Logic:
+                    FastAPI hands this HTML file a Python dictionary called 'profiles'.
+                    The Jinja engine loops through that list right here 
+                    before the page is even sent to the browser.
+                    -->
+                    {% for profile in profiles %}
+                        <!-- 
+                        For each profile, we inject data dynamically.
+                        The 'value' holds the secure database UUID (what the server cares about),
+                        while the text holds the human-readable First and Last Name.
+                        -->
+                        <option value="{{ profile.id }}">{{ profile.first_name }} {{ profile.last_name }}</option>
+                    {% endfor %}
+                    
+                </select>
+            </div>
+            
+            <button type="submit">Continue</button>
+        </form>
+    </div>
+
 </body>
 </html>
