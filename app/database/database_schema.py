@@ -11,6 +11,7 @@ to communicate with the Supabase database.
 """
 from pydantic import BaseModel, Field
 
+# User Profile Schema
 
 class CreateProfile(BaseModel):
     """
@@ -28,3 +29,42 @@ class CreateProfile(BaseModel):
     
     # 'last_name' must exactly match the column name in our Supabase `profiles` table.
     last_name: str = Field(..., description="Last name of the employee using the app")
+
+# AI Evaluation Schemas
+
+class AIEvaluationFeedback(BaseModel):
+    """
+    Schema representing a single piece of itemized feedback from the AI Comparison Agent.
+    
+    This model mirrors the structure needed for the `ai_evaluation_feedback` table.
+    The AI will generate multiple instances of this class (one for each campaign rule)
+    to provide explicit, traceable reasoning for its deductions.
+    """
+    feedback_text: str = Field(
+        ..., 
+        description="A concise sentence explaining exactly why the specific campaign rule was passed or failed by the AI."
+    )
+    is_compliant: bool = Field(
+        ..., 
+        description="Must be strictly True if the rule is perfectly met, or False if the rule is violated."
+    )
+
+
+class AIEvaluation(BaseModel):
+    """
+    The master 'Transport Envelope' Schema forced upon the LangChain Comparison Agent.
+    
+    When `with_structured_output(AIEvaluation)` is called, the AI is physically forced 
+    to generate this exact JSON block. It calculates the overall `ai_score` for the 
+    parent `ai_evaluation` table, and nests all the `feedbacks` that will later be 
+    unpacked and bulk-inserted into the `ai_evaluation_feedback` table.
+
+    """
+    ai_score: float = Field(
+        ..., 
+        description="The final calculated audit percentage (0.0 to 100.0) based on the ratio of compliant vs non-compliant rules."
+    )
+    feedbacks: list[AIEvaluationFeedback] = Field(
+        ..., 
+        description="The itemized list of specific evaluations for every single rule provided in the prompt."
+    )
