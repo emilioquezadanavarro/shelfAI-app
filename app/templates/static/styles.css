@@ -212,3 +212,223 @@ button:active {
 .header-section {
     margin-bottom: 3rem;
 }
+
+/* =========================================
+   EVALUATION DASHBOARD STYLES 
+   ========================================= */
+
+/* Score Display */
+.score-section {
+    margin-bottom: 2.5rem;
+}
+
+.score-label {
+    color: var(--accent);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.score-value {
+    font-size: 4.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0.25rem 0;
+    line-height: 1;
+    animation: scoreReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.score-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-top: 0.5rem;
+}
+
+/* Dynamic score colors */
+.score-perfect { color: #4ade80; }
+.score-good    { color: #a3e635; }
+.score-warning { color: #facc15; }
+.score-danger  { color: #f87171; }
+
+/* Divider */
+.divider {
+    width: 60px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 0 auto 2rem auto;
+    opacity: 0.6;
+}
+
+/* Feedback List */
+.feedback-section {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.feedback-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.feedback-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.75rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    animation: fadeUp 0.4s ease forwards;
+    opacity: 0;
+}
+
+.feedback-item:hover {
+    transform: translateX(4px);
+}
+
+/* Staggered animation for each feedback item */
+.feedback-item:nth-child(1) { animation-delay: 0.1s; }
+.feedback-item:nth-child(2) { animation-delay: 0.2s; }
+.feedback-item:nth-child(3) { animation-delay: 0.3s; }
+.feedback-item:nth-child(4) { animation-delay: 0.4s; }
+.feedback-item:nth-child(5) { animation-delay: 0.5s; }
+.feedback-item:nth-child(6) { animation-delay: 0.6s; }
+
+.feedback-pass {
+    border-left: 3px solid #4ade80;
+}
+
+.feedback-fail {
+    border-left: 3px solid #f87171;
+}
+
+.feedback-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.feedback-text {
+    color: var(--text-main);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    font-weight: 300;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-secondary {
+    flex: 1;
+    margin-top: 0;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.85rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--text-main);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-primary {
+    flex: 1;
+    margin-top: 0;
+}
+
+/* Score reveal animation */
+@keyframes scoreReveal {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Floating Home Link (top-left corner) */
+.home-link {
+    position: fixed;
+    top: 1.5rem;
+    left: 1.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+
+.home-link:hover {
+    border-color: var(--accent);
+    color: var(--text-main);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+/* =========================================
+   LOADING SPINNER OVERLAY
+   ========================================= */
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: var(--text-main);
+    font-size: 1rem;
+    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+}
