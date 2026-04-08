@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShelfAI | Dashboard</title>
+    <title>ShelfAI | User Dashboard</title>
     
     <!-- Google Fonts: Modern typography matching our brand guidelines -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,5 +63,35 @@
         </form>
     </div>
 
+    <!-- Loading Spinner Overlay (hidden by default, shown on form submit) -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p class="loading-text">Analyzing your shelf...</p>
+    </div>
+
+    <script>
+        // 1. Grab the file input and the text we want to change
+        const fileInput = document.querySelector('input[type="file"]');
+        const uploadText = document.querySelector('.upload-text');
+        
+        // 2. Listen for whenever a file is uploaded or dropped
+        fileInput.addEventListener('change', function(event) {
+            // If the user actually selected a file...
+            if (event.target.files.length > 0) {
+                // Grab the name of the file
+                const fileName = event.target.files[0].name;
+                
+                // Replace "Tap to take a photo" with a nice success message!
+                uploadText.textContent = "✅ " + fileName;
+                uploadText.style.color = "#4ade80"; // Turn the text a nice green color
+            }
+        });
+
+        // 3. Show loading spinner when the form is submitted
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        });
+    </script>
 </body>
 </html>
