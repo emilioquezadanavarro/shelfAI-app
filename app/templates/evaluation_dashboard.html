@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfAI | Evaluation Result</title>
+    
+    <!-- Google Fonts: Modern typography matching our brand guidelines -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- External modular CSS providing the glassmorphism container styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <div class="container dashboard-container" style="position: relative;">
+        
+        <!-- Small Home link pinned to the top-left corner of the card -->
+        <a href="/" class="home-link" style="position: absolute; top: 1rem; left: 1rem;">← Home</a>
+        <!-- Score Section -->
+        <div class="score-section">
+            <p class="score-label">AI Evaluation Score</p>
+            
+            <!-- 
+            Dynamic Score Rendering:
+            Jinja2 injects the AI score from our Supabase `ai_evaluation` table.
+            JavaScript below dynamically colors it based on the value.
+            -->
+            <div class="score-value" id="scoreDisplay">{{ evaluation.ai_score }}</div>
+            <p class="score-subtitle">out of 100</p>
+        </div>
+
+        <!-- Visual Divider (color set by JS) -->
+        <div class="divider" id="scoreDivider"></div>
+
+        <!-- Itemized Feedback Section -->
+        <div class="feedback-section">
+            <p class="feedback-title">Itemized Rule Breakdown</p>
+
+            <!-- 
+            Jinja2 Loop:
+            FastAPI passed us a list of feedback dictionaries from the 
+            `ai_evaluation_feedback` table. We loop through each one and 
+            render a styled card with a pass/fail indicator.
+            -->
+            {% for feedback in feedbacks %}
+                <div class="feedback-item {{ 'feedback-pass' if feedback.is_compliant else 'feedback-fail' }}">
+                    <span class="feedback-icon">
+                        {{ '✅' if feedback.is_compliant else '❌' }}
+                    </span>
+                    <span class="feedback-text">{{ feedback.feedback_text }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Centered New Audit Button -->
+        <a href="javascript:history.back()" style="text-decoration:none;">
+            <button type="button" style="width:100%;">New Audit</button>
+        </a>
+    </div>
+
+    <script>
+        // Dynamically color the score based on its value
+        const score = {{ evaluation.ai_score }};
+        const scoreEl = document.getElementById('scoreDisplay');
+        const dividerEl = document.getElementById('scoreDivider');
+
+        let colorClass = 'score-danger';
+        let dividerColor = '#f87171';
+
+        if (score === 100) {
+            colorClass = 'score-perfect';
+            dividerColor = '#4ade80';
+        } else if (score >= 75) {
+            colorClass = 'score-good';
+            dividerColor = '#a3e635';
+        } else if (score >= 50) {
+            colorClass = 'score-warning';
+            dividerColor = '#facc15';
+        }
+
+        scoreEl.classList.add(colorClass);
+        dividerEl.style.backgroundColor = dividerColor;
+    </script>
+</body>
+</html>
