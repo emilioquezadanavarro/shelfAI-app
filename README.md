@@ -1,6 +1,6 @@
 # 🏪 ShelfAI
 
-> ⚠️ **This project is currently under active development.** Features may change without notice.
+> ⚠️ **This project is currently under active development.** Features may change.
 
 **ShelfAI** is an AI-powered retail shelf auditing application that uses computer vision to evaluate in-store product displays against brand compliance rules. Field workers upload shelf photos, and a GPT-4o-mini Vision Agent instantly grades the display — providing an overall compliance score and itemized rule-by-rule feedback.
 
