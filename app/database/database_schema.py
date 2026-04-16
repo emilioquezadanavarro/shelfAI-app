@@ -68,3 +68,23 @@ class AIEvaluation(BaseModel):
         ..., 
         description="The itemized list of specific evaluations for every single rule provided in the prompt."
     )
+
+class AIEvaluationRules(BaseModel):
+    """
+    Schema for extracting structured rules from a marketing campaign PDF.
+    
+    This model is used by the ExtractionRulesAgent (GPT-4o-mini) to guarantee that 
+    the unstructured text from the PDF is parsed into a clean, predictable JSON 
+    object. This object is then saved as JSONB in the Supabase 'campaigns' table.
+
+    """
+
+    brand: str = Field(..., description="Name of the brand to analyze (e.g. Coca-Cola, Pepsi)")
+    campaign_name: str = Field(..., description="The name of the marketing campaign (e.g. Lanzamiento Verano 2026)")
+    portfolio_skus: list[str] = Field(..., description="List of expected supplementary products to find on the shelf")
+    focus_product: str = Field(..., description="The primary specific product to analyze for compliance")
+    target_price: float = Field(..., description="The exact expected price of the product at the store")
+    min_facings: float = Field(..., description="The minimum number of product facings that should be visible (e.g. 4.0)")
+    share_of_facing: int = Field(..., description="The expected percentage share of the total category (e.g. 15)")
+    price_tag_required: bool = Field(..., description="Boolean indicating whether a proper price tag must be visible on site")
+    rules: list[str] = Field(..., description="A clear, itemized list of specific text rules that the Vision AI must audit against")
