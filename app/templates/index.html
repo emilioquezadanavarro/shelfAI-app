@@ -16,6 +16,13 @@
     securely loads `styles.css` from the `app/templates/static` directory.
     -->
     <link rel="stylesheet" href="/static/styles.css">
+    
+    <style>
+        /* Center the box vertically for this specific page */
+        body {
+            align-items: center !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -28,10 +35,10 @@
         The HTML Form & Routing:
         When the user clicks 'Continue', the browser reads the selected 'profile_id' UUID value
         and builds a URL parameter string. It sends a GET request to the backend route 
-        we defined as `@router.get("/profile_dashboard")`.
+        defined as `@router.get("/profile_dashboard")`.
         Example generated URL: http://localhost:8000/profile_dashboard?profile_id=1d25496b...
         -->
-        <form action="/profile_dashboard" method="GET">
+        <form action="/upload-rules" method="GET">
             <div class="input-group">
                 <label for="profile_select">Field Worker</label>
                 
@@ -47,7 +54,7 @@
                     -->
                     {% for profile in profiles %}
                         <!-- 
-                        For each profile, we inject data dynamically.
+                        For each profile, it injects data dynamically.
                         The 'value' holds the secure database UUID (what the server needs),
                         while the text holds the human-readable First and Last Name.
                         -->
