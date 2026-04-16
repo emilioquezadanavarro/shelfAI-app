@@ -1,11 +1,7 @@
 import os
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 import base64
 from app.database.database_schema import AIEvaluation
-
-# Load environment variables
-load_dotenv()
 
 # Helper function. It translates the image into a giant string of text characters.
 def encode_image_to_base64(image_path: str) -> str:
@@ -43,9 +39,14 @@ class EvaluationAgent:
         messages = [
             (
                 "system",
-                f"You are an expert retail merchandising auditor.\n"
-                f"Your job is to evaluate shelf photos strictly against these Campaign Rules:\n\n{campaign_rules}\n\n"
-                "Analyze the image meticulously. For every rule, determine if it is compliant or not. "
+                f"You are a strict, expert retail merchandising auditor.\n"
+                f"Your job is to evaluate shelf photos meticulously against these Campaign Rules:\n\n{campaign_rules}\n\n"
+                "CRITICAL INSTRUCTIONS FOR EVALUATION:\n"
+                "1. PRICE TAGS: You MUST read the actual numbers printed on the price tags in the image. If a 'target_price' is specified in the rules, the price tag in the image must exactly match that number. If it says $1.50 but the rule requires $3.50, this is a FAILURE.\n"
+                "2. FACINGS: Count the exact number of physical units facing front. Do not guess.\n"
+                "3. COMPETITORS: Scan carefully for forbidden competitor brands.\n\n"
+                "4. FEEDBACK FORMAT: Each feedback_text MUST be bilingual. Follow this exact format: 'EN: [english text] / ES: [spanish text]'. Example: 'EN: The focus product is present on the shelf / ES: El producto focus está presente en la estantería'. NEVER write feedback in only one language.\n\n" # Few shot prompting.
+                "For every rule, determine if it is compliant or not. Be ruthlessly strict. "
                 "Calculate the final ai_score from 0.0 to 100.0 based on the results."
             ),
             (
