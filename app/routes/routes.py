@@ -21,14 +21,16 @@ from fastapi.responses import RedirectResponse
 # Import the initialized Supabase client to talk to the database
 from app.database.database_setup import supabase
 
-# Import our strict Pydantic schemas to validate incoming JSON data
+# Import the strict Pydantic schemas to validate incoming JSON data
 from app.database.database_schema import CreateProfile
 
 from app.ai_agents.evaluation_agent import EvaluationAgent
+from app.ai_agents.extraction_rules_agent import ExtractionRulesAgent, extract_text_from_pdf
 
 import base64
-
 import os
+
+
 
 # Initialize the router instance (this groups our endpoints together)
 router = APIRouter(
@@ -122,8 +124,162 @@ async def profile_dashboard(request: Request, profile_id: str):
         return {"status": "error", "message": str(e)}
 
 
+@router.get("/upload-rules")
+async def upload_rules_page(request: Request, profile_id: str = None):
+    """
+    Upload Rules Page - Serves the campaign document upload form.
+    
+    If a `profile_id` is supplied in the URL query parameters, this route fetches
+    the corresponding user profile from Supabase to provide a personalized greeting.
+
+    """
+    profile_data = None
+
+    if profile_id:
+        try:
+            profile_response = supabase.table("profiles").select("*").eq("id", profile_id).single().execute()
+            profile_data = profile_response.data
+        except Exception as e:
+            print(f"Warning: Could not fetch profile for greeting: {e}")
+
+    return index_template.TemplateResponse(
+        request=request,
+        name="upload_rules_document.html",
+        context={
+            "request": request, 
+            "profile_id": profile_id,
+            "profile": profile_data
+        }
+    )
+
+@router.post("/api/onboard_campaign")
+
+async def extracting_rules(campaign_document: UploadFile, profile_id: str = Form(...)):
+    """
+    Campaign Onboarding Endpoint - Extracts structured rules from a marketing PDF.
+
+    This route receives a PDF document uploaded by the marketing team, saves it to 
+    the server, extracts its text content using PyMuPDF, and then sends that raw text 
+    to the ExtractionRulesAgent (GPT-4o-mini). The AI parses the document and returns 
+    a structured JSON object containing brand info, SKU portfolio, KPIs, and audit rules.
+
+    The result is then persisted into the Supabase `campaigns` table as JSONB.
+
+    """
+
+    # Step 1: Read the raw bytes of the uploaded PDF asynchronously
+    imported_document_bytes = await campaign_document.read()
+
+    # Step 2: Save the PDF to the campaign_documents folder on disk
+    # This is required because our extract_text_from_pdf() helper opens files by path
+    base_dir = os.path.dirname(__file__)
+    pdf_path = os.path.join(base_dir, "..", "campaign_documents", campaign_document.filename)
+
+    with open(pdf_path, "wb") as f:
+        f.write(imported_document_bytes)
+
+    # Step 3: Extract the raw text content from the saved PDF
+    pdf_text = extract_text_from_pdf(campaign_document.filename)
+
+    # Step 4: Initialize and invoke the AI Extraction Agent
+    print("Initializing Extraction Rules Agent 🤖")
+    extraction_rules_agent = ExtractionRulesAgent()
+
+    try:
+        print("Invoking Extraction Rules Agent 🤖 (This takes ~5 seconds)...")
+        ai_extraction_result = await extraction_rules_agent.create_campaign_rules(pdf_text)
+
+        # Step 5: Print the structured result to the terminal for debugging
+        print("\n=== 🎯 EXTRACTED CAMPAIGN RULES ===")
+        print(f"Brand: {ai_extraction_result.brand}")
+        print(f"Campaign: {ai_extraction_result.campaign_name}")
+        print(f"Focus Product: {ai_extraction_result.focus_product}")
+        print(f"Target Price: ${ai_extraction_result.target_price}")
+        print(f"Min Facings: {ai_extraction_result.min_facings}")
+        print(f"Share of Facings: {ai_extraction_result.share_of_facing}%")
+        print(f"Price Tag Required: {ai_extraction_result.price_tag_required}")
+        print(f"\nPortfolio SKUs:")
+        for sku in ai_extraction_result.portfolio_skus:
+            print(f"  - {sku}")
+        print(f"\nRules:")
+        for rule in ai_extraction_result.rules:
+            print(f"  - {rule}")
+    except Exception as e:
+        return {"status": "error", "message": f"AI Engine Failed: {str(e)}"}
+
+    # Step 6: Save the extracted rules as JSONB into the Supabase campaigns table
+    # .model_dump() converts the Pydantic object into a Python dictionary for JSONB storage
+    try:
+        extraction_response = supabase.table("campaigns").insert({
+            "campaign_name": ai_extraction_result.campaign_name,
+            "evaluation_rules": ai_extraction_result.model_dump(),
+            "reference_image_url": "testing_placeholder_url.png", # Later, there will be a real storage bucket
+            "created_by": profile_id
+        }).execute()
+
+        # Grab the newly generated UUID assigned by the database and campaign name
+        new_campaign_id = extraction_response.data[0]["id"]
+        extracted_campaign_name = extraction_response.data[0]["campaign_name"]
+
+        print(f"\n✅ Marketing Rules have been saved to Supabase! Campaign Name: {extracted_campaign_name} ")
+
+        # Step 7: Redirect to the Campaign Dashboard
+        return RedirectResponse(f"/campaign/{new_campaign_id}?profile_id={profile_id}", status_code=303)
+        
+    except Exception as e:
+        return {"status": "error", "message": f"Database Insertion Failed: {str(e)}"}
+
+
+@router.get("/campaign/{campaign_id}")
+async def campaign_dashboard(request: Request, campaign_id: str, profile_id: str = None):
+    """
+    Campaign Dashboard - Displays extracted rules and provides the shelf photo upload form.
+
+    This route fetches the campaign record from Supabase using the URL parameter,
+    then injects the JSONB evaluation_rules into the HTML template so the user can
+    review the AI-extracted rules before uploading a shelf photo for auditing.
+    It also propagates the `profile_id` to ensure the final audit remains linked
+    to the active field worker.
+
+    """
+    try:
+        # Step 1: Fetch the campaign record from Supabase
+        campaign_response = supabase.table("campaigns").select("*").eq("id", campaign_id).single().execute()
+        campaign_data = campaign_response.data
+
+        # Step 2: Extract the JSONB rules for easy access in the template
+        rules_data = campaign_data.get("evaluation_rules", {})
+
+        # Step 3: Inject everything into the HTML template
+        return index_template.TemplateResponse(
+            request=request,
+            name="campaign_dashboard.html",
+            context={
+                "request": request,
+                "campaign": campaign_data,
+                "rules": rules_data,
+                "profile_id": profile_id
+            }
+        )
+
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to load campaign: {str(e)}"}
+
+
 @router.post("/api/analyze-shelf")
-async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...)):
+async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...), campaign_id: str = Form(...)):
+    """
+
+    AI Shelf Analysis Endpoint - Evaluates a shelf photo against campaign rules.
+
+    This core endpoint receives a shelf photo from the field worker, encodes it, 
+    and passes it to the EvaluationAgent (GPT-4o Vision). The agent acts as an 
+    expert auditor, comparing the visual reality against the strict text rules 
+    fetched from the specific campaign. It calculates a score and itemized feedback,
+    which are then persisted to Supabase, linking the audit to both the campaign 
+    and the profile.
+
+    """
 
     # Step 1: Read the physical bytes of the image asynchronously
     image_bytes = await shelf_photo.read()
@@ -132,13 +288,18 @@ async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...)):
     print("Encoding image for OpenAI 💻")
     base64_image = base64.b64encode(image_bytes).decode("utf-8")
 
-    # Step 3: The fake rules for testing
-    test_rules = """
-        REQUIREMENT 1: Red Coca-Cola products must be clearly visible and present.
-        REQUIREMENT 2: Competitor brands (specifically blue bottles) are STRICTLY FORBIDDEN anywhere on the shelves. If even one single blue bottle is visible in the photo, this rule absolutely FAILS.
-        REQUIREMENT 3: The shelf MUST NOT have any dark, empty gaps. It must be 100% fully stocked from end to end. If a bottle is missing, this rule FAILS.
-        REQUIREMENT 4: Every single bottle must be standing perfectly upright. If any bottle is knocked over horizontally, lying down, or tilted sideways, this rule absolutely FAILS.
-        """
+    # Step 3: Fetch the real campaign rules from Supabase
+    print(f"Fetching rules for campaign: {campaign_id}")
+    import json
+    try:
+        campaign_result = supabase.table("campaigns").select("evaluation_rules").eq("id", campaign_id).single().execute()
+
+        # Convert the JSON back into a formatted string so the AI can read it easily
+        real_rules = json.dumps(campaign_result.data["evaluation_rules"], indent=2)
+
+    except Exception as e:
+        return {"status": "error", "message": f"Could not find campaign rules: {str(e)}"}
+
 
     # Step 4: Calling the agent
     print("Initializing Evaluation Agent 🤖")
@@ -147,12 +308,12 @@ async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...)):
     # Step 5: Run the AI Engine
     try:
         print("Invoking Evaluation Agent 🤖 (This takes ~5 seconds)...")
-        ai_result = await evaluation_agent.analyze_shelf_image(base64_image, test_rules)
+        ai_evaluation_result = await evaluation_agent.analyze_shelf_image(base64_image, real_rules)
 
         print("\n=== 🎯 EVALUATION RESULT ===")
-        print(f"Overall Score: {ai_result.ai_score}/100")
+        print(f"Overall Score: {ai_evaluation_result.ai_score}/100")
         print("\nEvaluation Feedback:")
-        for detail in ai_result.feedbacks:
+        for detail in ai_evaluation_result.feedbacks:
             status = "✅ PASS" if detail.is_compliant else "❌ FAIL"
             print(f" - {status}: {detail.feedback_text}")
 
@@ -164,7 +325,8 @@ async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...)):
         eval_response = supabase.table("ai_evaluation").insert({
             "profile_id": profile_id,
             "uploaded_image_url": "testing_placeholder_url.png",  # Later, there will be a real storage bucket
-            "ai_score": ai_result.ai_score
+            "ai_score": ai_evaluation_result.ai_score,
+            "campaign_id": campaign_id
         }).execute()
 
         # Grab the newly generated UUID assigned by the database
@@ -172,7 +334,7 @@ async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...)):
 
         # Step 7: Bulk-Save the Children Records (The Itemized Feedback)
         feedbacks_to_insert = []
-        for detail in ai_result.feedbacks:
+        for detail in ai_evaluation_result.feedbacks:
             feedbacks_to_insert.append({
                 "ai_evaluation_id": new_evaluation_id,
                 "feedback_text": detail.feedback_text,
@@ -189,6 +351,14 @@ async def analyze_shelf(shelf_photo: UploadFile, profile_id: str = Form(...)):
 
 @router.get("/evaluation/{eval_id}")
 async def evaluation_dashboard(request:Request, eval_id: str):
+    """
+    Evaluation Scorecard - Displays the final results of an AI shelf audit.
+
+    This route fetches the parent `ai_evaluation` record (the overall score) and 
+    all associated `ai_evaluation_feedback` records (the itemized checklist) from 
+    Supabase. It renders them in a clean scorecard UI for the field worker to review.
+
+    """
 
     try:
         # Step 1: Get the main scorecard (the parent row)
