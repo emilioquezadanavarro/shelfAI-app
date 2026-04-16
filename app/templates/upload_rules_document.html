@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfAI | Campaign Onboarding</title>
+    
+    <!-- Google Fonts: Modern typography matching our brand guidelines -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- External modular CSS providing the glassmorphism container styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        /* Center the box vertically for this specific short page */
+        body {
+            align-items: center !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Home link -->
+    <a href="/" class="home-link">← Home</a>
+
+    <div class="container dashboard-container">
+        
+        <div class="header-section">
+            <p class="welcome-header">Welcome, {% if profile %}{{ profile.first_name }}{% else %}User{% endif %}</p>
+            <h1>Campaign Setup</h1>
+            <p>Upload a marketing PDF and let AI extract the campaign rules automatically.</p>
+        </div>
+
+        <!-- 
+        The PDF Upload Form:
+        Posts to the campaign onboarding API endpoint.
+        CRITICAL: `enctype="multipart/form-data"` is required for file uploads.
+        -->
+        <form action="/api/onboard_campaign" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="profile_id" value="{{ profile_id }}">
+            <!-- Drag & Drop Upload Zone styled with custom CSS -->
+            <div class="upload-area">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Tap to select a PDF</div>
+                <div class="upload-subtext">or drag and drop your document here</div>
+                
+                <!-- 
+                File Input Constraint:
+                `accept=".pdf"` restricts the upload widget to PDF documents only.
+                -->
+                <input type="file" name="campaign_document" accept=".pdf" required>
+            </div>
+            
+            <button type="submit">Extract Campaign Rules</button>
+        </form>
+    </div>
+
+    <!-- Loading Spinner Overlay (hidden by default, shown on form submit) -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p class="loading-text">Extracting campaign rules...</p>
+    </div>
+
+    <script>
+        // 1. Grab the file input and the text we want to change
+        const fileInput = document.querySelector('input[type="file"]');
+        const uploadText = document.querySelector('.upload-text');
+        
+        // 2. Listen for whenever a file is selected
+        fileInput.addEventListener('change', function(event) {
+            if (event.target.files.length > 0) {
+                const fileName = event.target.files[0].name;
+                uploadText.textContent = "✅ " + fileName;
+                uploadText.style.color = "#4ade80";
+            }
+        });
+
+        // 3. Show loading spinner when the form is submitted
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        });
+    </script>
+</body>
+</html>
