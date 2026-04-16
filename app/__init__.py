@@ -20,10 +20,10 @@ from app.routes.routes import router
 import os
 
 # 1. Load Environment Variables First
-# This ensures that OS level variables like SUPABASE_URL are securely loaded
+# This ensures that OS level variables like SUPABASE_URL or OpenAI API Key are securely loaded
 # before any other files try to import them.
 load_dotenv()
-
+print("🔑 Credential keys are loaded!")
 
 def create_app():
     """
