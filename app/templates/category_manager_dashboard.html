@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfAI | Category Manager Dashboard</title>
+    
+    <!-- Google Fonts: Modern typography matching our brand guidelines -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- External modular CSS providing the glassmorphism container styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <style>
+        /* Center the dashboard vertically on this page */
+        body {
+            align-items: center !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Home link -->
+    <a href="/" class="home-link">← Logout</a>
+
+    <!-- Main glassmorphism container, wider to accommodate two action cards -->
+    <div class="container manager-container">
+        
+        <!-- Header Section -->
+        <div class="header-section">
+            <p class="welcome-header">Welcome, {% if profile %}{{ profile.first_name }}{% else %}Manager{% endif %}</p>
+            <h1>Category Manager Dashboard</h1>
+            {% if success_msg %}
+            <p class="success-message">{{ success_msg }}</p>
+            {% endif %}
+
+            <p>Select an action below to manage your team and campaigns.</p>
+        </div>
+
+        <!-- Action Cards Grid -->
+        <div class="action-cards">
+
+            <!-- Card 1: Create a new Field Worker -->
+            <a href="/category_manager/create_worker?profile_id={{ profile_id }}" class="action-card">
+                <div class="action-card-icon">👷</div>
+                <h3 class="action-card-title">Create Worker</h3>
+                <p class="action-card-description">Register a new field worker with a temporary password.</p>
+            </a>
+
+            <!-- Card 2: Upload Campaign Rules PDF -->
+            <a href="/upload-rules?profile_id={{ profile_id }}" class="action-card">
+                <div class="action-card-icon">📄</div>
+                <h3 class="action-card-title">Upload Campaign</h3>
+                <p class="action-card-description">Upload a marketing PDF to extract campaign audit rules.</p>
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
