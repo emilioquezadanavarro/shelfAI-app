@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfAI | Create Field Worker</title>
+    
+    <!-- Google Fonts: Modern typography matching our brand guidelines -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- External modular CSS providing the glassmorphism container styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <style>
+        /* Center the form vertically on this page */
+        body {
+            align-items: center !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Back to Dashboard link -->
+    <a href="/category_manager/dashboard?profile_id={{ profile_id }}" class="home-link">← Dashboard</a>
+
+    <!-- Main glassmorphism container -->
+    <div class="container dashboard-container">
+        
+        <!-- Header Section -->
+        <div class="header-section">
+            <p class="welcome-header">New Team Member</p>
+            <h1>Create Field Worker</h1>
+            <p>Fill in the details below to register a new field worker account.</p>
+        </div>
+
+        <!-- 
+        Worker Registration Form:
+        Posts to the category_manager/create_worker API endpoint.
+        The role is hardcoded as 'worker' via a hidden field so it cannot be tampered with.
+        -->
+        <form action="/category_manager/create_worker" method="POST">
+
+            <div class="input-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" placeholder="e.g. Carlos" required>
+            </div>
+
+            <div class="input-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" placeholder="e.g. García" required>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="e.g. carlos@company.com" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Temporary Password</label>
+                <input type="password" id="password" name="password" placeholder="Min. 6 characters" required>
+            </div>
+
+            <div class="input-group">
+                <label for="role">Account Role</label>
+                <select id="role" name="role" required>
+                    <option value="worker">Worker</option>
+                </select>
+            </div>
+
+            <!-- Hidden field: created_by_id traces who created them -->
+            <input type="hidden" name="created_by_id" value="{{ profile_id }}">
+
+            <button type="submit">Create Worker Account</button>
+        </form>
+    </div>
+
+</body>
+</html>
