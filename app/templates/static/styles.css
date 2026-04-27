@@ -71,6 +71,36 @@ p {
     text-align: left;
 }
 
+/* Text input styling (login, registration forms) */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 1rem;
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+
 label {
     font-size: 0.85rem;
     font-weight: 600;
@@ -130,6 +160,21 @@ button:hover {
 
 button:active {
     transform: scale(0.98);
+}
+
+.success-message {
+    background-color: rgba(16, 185, 129, 0.15); /* Soft green background */
+    color: #10b981; /* Emerald green text */
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
+    animation: fadeUp 0.4s ease-out;
 }
 
 @keyframes fadeUp {
@@ -439,3 +484,69 @@ button:active {
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.02em;
 }
+
+/* =========================================
+   MANAGER DASHBOARD STYLES 
+   ========================================= */
+
+/* Wider container to fit the action cards side by side */
+.manager-container {
+    max-width: 580px;
+}
+
+/* Grid layout for the two action cards */
+.action-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+/* Individual action card styling */
+.action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.action-card:hover {
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.action-card-icon {
+    font-size: 2.5rem;
+    transition: transform 0.3s ease;
+}
+
+.action-card:hover .action-card-icon {
+    transform: scale(1.15);
+}
+
+.action-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.action-card-description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin: 0;
+    line-height: 1.4;
+    text-align: center;
+}
+
