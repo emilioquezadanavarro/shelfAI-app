@@ -198,51 +198,7 @@
             {% endfor %}
         </div>
 
-        <!-- Photo Upload Card -->
-        <div class="campaign-card audit-section">
-            <h2>Upload Shelf Photo</h2>
-            <p>Take a photo of the shelf to audit against these rules.</p>
-
-            <form action="/api/analyze-shelf" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-                <input type="hidden" name="profile_id" value="{{ profile_id }}">
-
-                
-                <div class="upload-area">
-                    <div class="upload-icon">📸</div>
-                    <div class="upload-text">Tap to take a photo</div>
-                    <div class="upload-subtext">or drag and drop an image here</div>
-                    <input type="file" name="shelf_photo" accept="image/*" required>
-                </div>
-                
-                <button type="submit">Run AI Audit</button>
-            </form>
-        </div>
-
     </div>
-
-    <!-- Loading Spinner Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p class="loading-text">Analyzing your shelf...</p>
-    </div>
-
-    <script>
-        const fileInput = document.querySelector('input[type="file"]');
-        const uploadText = document.querySelector('.upload-text');
-        
-        fileInput.addEventListener('change', function(event) {
-            if (event.target.files.length > 0) {
-                const fileName = event.target.files[0].name;
-                uploadText.textContent = "✅ " + fileName;
-                uploadText.style.color = "#4ade80";
-            }
-        });
-
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function() {
-            document.getElementById('loadingOverlay').classList.add('active');
-        });
-    </script>
+</body>
 </body>
 </html>
