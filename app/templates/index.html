@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShelfAI | Select Profile</title>
+    <title>ShelfAI | Intelligent Shelf Audit Solutions</title>
     
     <!-- Google Fonts: Inter. Used for a clean, modern aesthetic across the app -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +29,8 @@
     <!-- Main styled glassmorphism card -->
     <div class="container">
         <h1>ShelfAI</h1>
-        <p>Select a field worker profile to begin your audit.</p>
+        <h4>Intelligent Shelf Audit Solutions</h4>
+        <p>Please, log in to continue</p>
         
         <!-- 
         The HTML Form & Routing:
@@ -38,33 +39,18 @@
         defined as `@router.get("/profile_dashboard")`.
         Example generated URL: http://localhost:8000/profile_dashboard?profile_id=1d25496b...
         -->
-        <form action="/upload-rules" method="GET">
+        <form action="/api/login" method="POST">
             <div class="input-group">
-                <label for="profile_select">Field Worker</label>
-                
-                <select id="profile_select" name="profile_id" required>
-                    <!-- Default disabled option ensuring the user actively chooses someone -->
-                    <option value="" disabled selected>Select a profile...</option>
-                    
-                    <!-- 
-                    Jinja2 Templating Logic:
-                    FastAPI hands this HTML file a Python dictionary called 'profiles'.
-                    The Jinja engine loops through that list right here 
-                    before the page is even sent to the browser.
-                    -->
-                    {% for profile in profiles %}
-                        <!-- 
-                        For each profile, it injects data dynamically.
-                        The 'value' holds the secure database UUID (what the server needs),
-                        while the text holds the human-readable First and Last Name.
-                        -->
-                        <option value="{{ profile.id }}">{{ profile.first_name }} {{ profile.last_name }}</option>
-                    {% endfor %}
-                    
-                </select>
+                <label for="email">Email</label>
+                <input type="email" name = "email" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name = "password" required>
             </div>
             
-            <button type="submit">Continue</button>
+            <button type="submit">Log in</button>
         </form>
     </div>
 
