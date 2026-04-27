@@ -172,12 +172,28 @@ async def category_manager_dashboard(request: Request, profile_id: str, success_
         # Step 2: Extract the single profile dictionary from the response list
         category_manager_profile = category_manager_profile_response.data[0]
 
-        # Step 3: Bundle all data the HTML template needs into a context dictionary
+        # Step 3: Fetch Dashboard Metrics
+        # Count workers created by this manager
+        workers_response = supabase.table("profiles").select("id").eq("created_by_id", profile_id).execute()
+        total_workers = len(workers_response.data)
+        
+        # Count total completed audits
+        audits_response = supabase.table("ai_evaluation").select("id").execute()
+        total_audits = len(audits_response.data)
+
+        # Count total campaigns
+        campaigns_response = supabase.table("campaigns").select("id").execute()
+        total_campaigns = len(campaigns_response.data)
+
+        # Step 4: Bundle all data the HTML template needs into a context dictionary
         category_manager_profile_context_data = {
             "request": request,          # Strictly required by FastAPI for templating
             "profile": category_manager_profile,  # Full profile dict → {{ profile.first_name }}
             "profile_id": profile_id,    # Passed to child routes via URL links
-            "success_msg": success_msg   # Optional flash message after worker creation
+            "success_msg": success_msg,  # Optional flash message after worker creation
+            "total_workers": total_workers,
+            "total_audits": total_audits,
+            "total_campaigns": total_campaigns
         }
 
         # Step 4: Render the dashboard HTML with the manager's data injected
