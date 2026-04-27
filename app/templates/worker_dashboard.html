@@ -25,7 +25,7 @@
             inside the 'profile' context variable. Jinja2 injects it right here natively!
             -->
             <p class="welcome-header">Welcome Back</p>
-            <h1>{{ profile.first_name }} {{ profile.last_name }}</h1>
+            <h1>{{ profile.first_name }}</h1>
             <p>Upload a shelf photo to begin the AI audit.</p>
         </div>
 
@@ -46,7 +46,7 @@
             <input type="hidden" name="profile_id" value="{{ profile.id }}">
 
             <!-- Campaign Selector -->
-            <div class="input-group">
+            <div class="input-group" style="margin-bottom: 2rem;">
                 <label for="campaign_id">Select Campaign to Audit</label>
                 <select id="campaign_id" name="campaign_id" required>
                     <option value="" disabled selected>Choose a campaign...</option>
