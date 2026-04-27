@@ -201,6 +201,41 @@ button:active {
     max-width: 500px;
 }
 
+/* Manager Dashboard Specific Container */
+.manager-container {
+    max-width: 650px; /* Slightly wider to fit side-by-side cards */
+}
+
+/* KPI Metric Cards (Manager Dashboard) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* 3 equal columns */
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(30, 41, 59, 0.7); /* Darker slate background */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+}
+
+.stat-title {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1;
+}
+
 .welcome-header {
     color: var(--accent);
     font-size: 1.2rem;
