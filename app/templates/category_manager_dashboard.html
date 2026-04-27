@@ -32,11 +32,27 @@
         <div class="header-section">
             <p class="welcome-header">Welcome, {% if profile %}{{ profile.first_name }}{% else %}Manager{% endif %}</p>
             <h1>Category Manager Dashboard</h1>
+            <p>Manage workers and audit documents</p>
+            
             {% if success_msg %}
             <p class="success-message">{{ success_msg }}</p>
             {% endif %}
+        </div>
 
-            <p>Select an action below to manage your team and campaigns.</p>
+        <!-- KPI Metric Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total Workers</div>
+                <div class="stat-value">{{ total_workers }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Audits Completed</div>
+                <div class="stat-value">{{ total_audits }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Campaigns</div>
+                <div class="stat-value">{{ total_campaigns }}</div>
+            </div>
         </div>
 
         <!-- Action Cards Grid -->
