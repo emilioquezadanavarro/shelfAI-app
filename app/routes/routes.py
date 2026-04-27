@@ -121,8 +121,10 @@ async def login(email: str = Form(...), password: str = Form(...)):
         #5. Create the RedirectResponse based on the role
         # Role-based routing: send each user type to their specific dashboard
         if user_role == "category manager":
+            print(f"✅️ SUCCESS: You have logged in as a Category Manager!")
             response = RedirectResponse(url=f"/category_manager/dashboard?profile_id={user_id}", status_code=303)
         elif user_role == "worker":
+            print(f"✅️ SUCCESS: You have logged in as a Field Worker!")
             response = RedirectResponse(url=f"/worker_dashboard?profile_id={user_id}", status_code=303)
         else:
             raise Exception("Invalid role")
@@ -287,10 +289,15 @@ async def worker_dashboard(request: Request, profile_id: str):
         # Since IDs are unique, this extracts the first (and only) dictionary in the list
         actual_profile = profile_response.data[0]
 
-        # Step 2: Box up the profile data so the Jinja engine can read it
+        # Step 2: Fetch all available campaigns so the worker can select one
+        campaigns_response = supabase.table("campaigns").select("id, campaign_name").execute()
+        campaigns_list = campaigns_response.data
+
+        # Step 3: Box up the profile and campaign data so the Jinja engine can read it
         profile_context_data = {
             "request": request,       # Strictly required by FastAPI for templating
-            "profile": actual_profile # Injected so HTML can use {{ profile.first_name }}
+            "profile": actual_profile, # Injected so HTML can use {{ profile.first_name }}
+            "campaigns": campaigns_list # Injected so HTML can build a dropdown
         }
 
         # Step 3: Pass everything to the template engine to compile into HTML
@@ -438,6 +445,7 @@ async def campaign_dashboard(request: Request, campaign_id: str, profile_id: str
             context={
                 "request": request,
                 "campaign": campaign_data,
+                "campaign_id": campaign_id,
                 "rules": rules_data,
                 "profile_id": profile_id
             }
