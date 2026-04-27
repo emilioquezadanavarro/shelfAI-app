@@ -45,6 +45,17 @@
             -->
             <input type="hidden" name="profile_id" value="{{ profile.id }}">
 
+            <!-- Campaign Selector -->
+            <div class="input-group">
+                <label for="campaign_id">Select Campaign to Audit</label>
+                <select id="campaign_id" name="campaign_id" required>
+                    <option value="" disabled selected>Choose a campaign...</option>
+                    {% for campaign in campaigns %}
+                    <option value="{{ campaign.id }}">{{ campaign.campaign_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <!-- Drag & Drop Upload Zone styled with custom CSS -->
             <div class="upload-area">
                 <div class="upload-icon">📸</div>
