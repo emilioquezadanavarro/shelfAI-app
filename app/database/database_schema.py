@@ -13,22 +13,33 @@ from pydantic import BaseModel, Field
 
 # User Profile Schema
 
-class CreateProfile(BaseModel):
+class CreateWorker(BaseModel):
     """
-    Schema for creating a new user profile / field worker.
+    Schema for creating a new Field Worker profile.
     
-    This class inherits from BaseModel, allowing FastAPI to automatically parse
-    incoming JSON requests into this Python object. The Field validation ensures 
-    clear documentation for OpenAPI (Swagger) and enforces data presence.
+    This class defines the data structure required from the registration form.
+    It is used strictly by the Category Manager's 'Two-Step Procedure' Admin Workflow
+    to create the worker's Supabase Auth account and their database profile.
 
     """
     
     # 'first_name' must exactly match the column name in our Supabase `profiles` table.
-    # The '...' inside Field(...) means this field is strictly required.
     first_name: str = Field(..., description="First name of the employee using the app")
     
     # 'last_name' must exactly match the column name in our Supabase `profiles` table.
     last_name: str = Field(..., description="Last name of the employee using the app")
+
+    # 'role' is currently restricted to 'worker' via the frontend form, but 'category_manager' is structurally valid.
+    role: str = Field(..., description="Role of the user in the system (e.g. 'worker')")
+
+    # Email used for authentication via Supabase GoTrue.
+    email: str = Field(..., description="Email of the new worker account")
+
+    # Temporary password for the worker's first login.
+    password: str = Field(..., description="Temporary password for the new worker account")
+
+    # Category manager who created the worker/user
+    created_by_id: str = Field(..., description="The ID of the manager who created this worker")
 
 # AI Evaluation Schemas
 
